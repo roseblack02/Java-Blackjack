@@ -4,8 +4,14 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Main {
     public static void main(String[] args) {
         // variables
-        int playerPoints, dealerPoints, playerCard1, playerCard2, dealerCard1, dealerCard2, playerTokens = 100, playerBet, doubleDown;
+        int playerTokens = 100, playerBet, doubleDown;
         String cardName, choice = "", keepPlaying = "", bet;
+
+        //player object
+        Player player = new Player();
+
+        //dealer object
+        Player dealer = new Player();
 
         // input
         Scanner input = new Scanner(System.in);
@@ -37,24 +43,24 @@ public class Main {
             }
 
             // deal in players first 2 cards
-            playerCard1 = deal();
+            player.setCard1(deal());
             // show card name
-            cardName = convertCard(playerCard1);
-            System.out.println("\n" + cardName + "\nValue: " + playerCard1);
+            cardName = convertCard(player.getCard1());
+            System.out.println("\n" + cardName + "\nValue: " + player.getCard1());
 
-            playerCard2 = deal();
-            cardName = convertCard(playerCard2);
-            System.out.println("\n" + cardName + "\nValue: " + playerCard2);
+            player.setCard2(deal());
+            cardName = convertCard(player.getCard2());
+            System.out.println("\n" + cardName + "\nValue: " + player.getCard2());
 
             //check for blackjack
-            if ((playerCard1 == 1 && playerCard2 == 10) || (playerCard2 == 1 && playerCard1 == 10)) {
+            if ((player.getCard1() == 1 && player.getCard2() == 10) || (player.getCard2() == 1 && player.getCard1()== 10)) {
                 System.out.println("Player blackjack!");
-                playerPoints = 21;
+                player.setPoints(21);
             } else {
-                playerPoints = playerCard1 + playerCard2;
+                player.setPoints(player.getCard1() + player.getCard2());
             }
 
-            System.out.println("\nCurrent points: " + playerPoints);
+            System.out.println("\nCurrent points: " + player.getPoints());
 
             System.out.println("Press enter to continue.");
             input.nextLine();
@@ -62,44 +68,41 @@ public class Main {
             //deal dealers first card
             System.out.println("\nDealing dealer's cards.");
 
-            dealerCard1 = deal();
-            cardName = convertCard(dealerCard1);
-            System.out.println("\n" + cardName + "\nValue: " + dealerCard1);
+            dealer.setCard1(deal());
+            cardName = convertCard(dealer.getCard1());
+            System.out.println("\n" + cardName + "\nValue: " + dealer.getCard1());
 
-            dealerPoints = dealerCard1;
+            dealer.setPoints(dealer.getCard1());
 
             System.out.println("Press enter to continue.");
             input.nextLine();
 
+            //reset player choice
+            choice = "";
+
             // get players choice
-            while ((playerPoints < 21) && !choice.equals("stand") && !choice.equals("double")) {
+            while ((player.getPoints() < 21) && !choice.equals("stand") && !choice.equals("double")) {
                 choice = playerChoice();
 
                 // hit if player chose hit
-                if (choice.equals("hit")) {
-                    playerCard2 = deal();
-                    cardName = convertCard(playerCard2);
-                    System.out.println("\n" + cardName + "\nValue: " + playerCard2);
+                if (!choice.equalsIgnoreCase("stand")) {
+                    player.setCard2(deal());
+                    cardName = convertCard(player.getCard2());
+                    System.out.println("\n" + cardName + "\nValue: " + player.getCard2());
 
-                    playerPoints += playerCard2;
-                    System.out.println("\nCurrent points: " + playerPoints);
+                    player.addPoints(player.getCard2());
+
+                    System.out.println("\nCurrent points: " + player.getPoints());
                 }
 
                 // double down
                 if(choice.equalsIgnoreCase("double")){
                     doubleDown = 2;
-
-                    playerCard2 = deal();
-                    cardName = convertCard(playerCard2);
-                    System.out.println("\n" + cardName + "\nValue: " + playerCard2);
-
-                    playerPoints += playerCard2;
-                    System.out.println("\nCurrent points: " + playerPoints);
                 }
             }
 
             // bust
-            if (playerPoints > 21) {
+            if (player.getPoints() > 21) {
                 System.out.println("player bust!");
             }
 
@@ -109,32 +112,32 @@ public class Main {
             // dealers second card
             System.out.println("\nDealing dealer's cards.");
 
-            dealerCard2 = deal();
-            cardName = convertCard(dealerCard2);
-            System.out.println("\n" + cardName + "\nValue: " + dealerCard2);
+            dealer.setCard2(deal());
+            cardName = convertCard(dealer.getCard2());
+            System.out.println("\n" + cardName + "\nValue: " + dealer.getCard2());
 
             //check for blackjack
-            if ((dealerCard1 == 1 && dealerCard2 == 10) || (dealerCard2 == 1 && dealerCard1 == 10)) {
+            if ((dealer.getCard1() == 1 && dealer.getCard2() == 10) || (dealer.getCard2() == 1 && dealer.getCard1() == 10)) {
                 System.out.println("Dealer blackjack!");
-                dealerPoints = 21;
+                dealer.setPoints(21);
             } else {
-                dealerPoints += dealerCard2;
+                dealer.addPoints(dealer.getCard2());
             }
 
-            System.out.println("\nCurrent points: " + dealerPoints);
+            System.out.println("\nCurrent points: " + dealer.getPoints());
 
             //deal dealer until they get 17+ and player is not bust
-            while (dealerPoints < 17 && playerPoints < 22) {
-                dealerCard2 = deal();
-                cardName = convertCard(dealerCard2);
-                System.out.println("\n" + cardName + "\nValue: " + dealerCard2);
+            while (dealer.getPoints() < 17 && player.getPoints() < 22) {
+                dealer.setCard2(deal());
+                cardName = convertCard(dealer.getCard2());
+                System.out.println("\n" + cardName + "\nValue: " + dealer.getCard2());
 
-                dealerPoints += dealerCard2;
-                System.out.println("\nCurrent points: " + dealerPoints);
+                dealer.addPoints(dealer.getCard2());
+                System.out.println("\nCurrent points: " + dealer.getPoints());
             }
 
             // check for dealer bust
-            if (dealerPoints > 21) {
+            if (dealer.getPoints() > 21) {
                 System.out.println("Dealer bust!");
             }
 
@@ -145,21 +148,20 @@ public class Main {
             playerBet *= doubleDown;
 
             // check for win or lose
-            if(playerPoints >= 22){
+            if(player.getPoints() >= 22){
                 System.out.println("\nYou lose!");
                 playerTokens -= playerBet;
-            }else if(dealerPoints >= 22){
+            }else if(dealer.getPoints() >= 22){
                 System.out.println("\nYou win!");
                 playerTokens += playerBet;
-            } else if(playerPoints < dealerPoints) {
+            } else if(player.getPoints() < dealer.getPoints()) {
                 System.out.println("\nYou lose!");
                 playerTokens -= playerBet;
-            } else if(playerPoints > dealerPoints) {
+            } else if(player.getPoints() > dealer.getPoints()) {
                 System.out.println("\nYou win!");
                 playerTokens += playerBet;
             }else{
                 System.out.println("\nPush!");
-                playerTokens += playerBet;
             }
 
             // check if player is out of tokens
