@@ -1,6 +1,6 @@
 public class Player {
     //states
-    int points, card1, card2;
+    private int points, card1, card2;
 
     //constructor
     public Player(){
